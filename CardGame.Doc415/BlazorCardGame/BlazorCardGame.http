@@ -1,0 +1,51 @@
+﻿@BlazorCardGame_HostAddress = https://localhost:7151
+
+GET {{BlazorCardGame_HostAddress}}/api/cardgames
+
+###
+
+GET {{BlazorCardGame_HostAddress}}/api/cardgames
+
+###
+
+GET {{BlazorCardGame_HostAddress}}/api/cardgames
+
+###
+
+GET {{BlazorCardGame_HostAddress}}/api/cardgames
+
+###
+
+GET {{BlazorCardGame_HostAddress}}/api/cardgames
+
+###
+
+GET {{BlazorCardGame_HostAddress}}/api/cardgames
+
+###
+
+GET {{BlazorCardGame_HostAddress}}/api/cardgames
+
+###
+
+POST {{BlazorCardGame_HostAddress}}/api/cardgames
+Content-Type: application/json
+
+{"cardgame":{  "GameDate":"22-11-2022",
+  "GameTime":"15",
+  "GameType":"empty"
+}}
+
+###
+
+GET {{BlazorCardGame_HostAddress}}/api/cardgames/0
+
+###
+
+DELETE {{BlazorCardGame_HostAddress}}/api/cardgames/3
+
+###
+
+GET {{BlazorCardGame_HostAddress}}/api/cardgames?dateS=11-12-2023&dateE=08-03-2024
+
+###

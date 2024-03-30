@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.9.34622.214
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlazorCardGame", "BlazorCardGame\BlazorCardGame.csproj", "{7EA38FA2-D55E-4DFF-943A-95B441FE33EA}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlazorCardGame.Client", "BlazorCardGame.Client\BlazorCardGame.Client.csproj", "{89CBDB0A-32FA-4B91-93A6-28BB59ACEE4A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{7EA38FA2-D55E-4DFF-943A-95B441FE33EA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7EA38FA2-D55E-4DFF-943A-95B441FE33EA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7EA38FA2-D55E-4DFF-943A-95B441FE33EA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7EA38FA2-D55E-4DFF-943A-95B441FE33EA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{89CBDB0A-32FA-4B91-93A6-28BB59ACEE4A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{89CBDB0A-32FA-4B91-93A6-28BB59ACEE4A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{89CBDB0A-32FA-4B91-93A6-28BB59ACEE4A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{89CBDB0A-32FA-4B91-93A6-28BB59ACEE4A}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {01B13D29-C36B-4051-B690-961F56EFDBFC}
+	EndGlobalSection
+EndGlobal

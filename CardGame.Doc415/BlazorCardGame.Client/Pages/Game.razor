@@ -1,0 +1,204 @@
+﻿@page "/Game"
+@rendermode InteractiveWebAssembly
+@using Model
+@using System.Diagnostics
+@using Services
+@inject NavigationManager NavigationManager
+
+
+<div class="gamebody bg-image">
+<h3>Game</h3>
+@{
+    int index = 0;
+    <div class="row bg-image" id="gameboard">
+ @foreach (var card in Cards)
+{
+    int myId = index;
+        card.Id = myId;
+        <div class="col-6 col-lg-4 col-xxl-3">
+            <button class="btn d-inline m-2" id="@card.Id" @onclick="(async ()=>await GetInput(card.Value,myId))"><img src=@card.Image width="150" height="150" /></button>
+        </div>
+  index++;
+}
+</div>
+}
+
+
+<div>
+    <p> @answer</p>
+    <p>Score: @score pairs</p>
+    <h1>Game time: @gameTime sec</h1>
+    <button type="button" @onclick="@StartTimer"class="btn btn-warning"> @buttonText</button>
+</div>
+
+</div>
+@code {
+    private string buttonText = "Start game";
+    private int score=0;
+    private bool isWaiting;
+    private bool isGameOver=true;
+    private List<int> board = new();
+    private string answer;
+    bool twoCardSelected;
+    List<Card> selectedCards = new();
+    List<int> selectedIndexes = new();
+    List<Card> Cards = new();
+    int cardTurnTimer = 2000;  // zorluk derecesini ayarlamak için azaltabilirsin. Menüye seçenek olarak eklenecek
+    int cardCount = 5; //zorluk derecesinde arttırılacak ve assette uygun sayida image eklenecek
+    private Stopwatch stopwatch;
+
+    private static System.Timers.Timer aTimer;
+    private int gameTime = 0;
+
+    public void StartTimer ()
+    {
+        if (isGameOver && gameTime>0){
+            NavigationManager.NavigateTo("Game", true);
+            buttonText = "New game";
+        }
+        buttonText = "Now playing";
+        aTimer = new System.Timers.Timer(1000);
+        aTimer.Elapsed += GameTimer;
+        aTimer.Enabled = true;
+        isGameOver = false;
+    }
+
+    public void GameTimer (Object source, System.Timers.ElapsedEventArgs e)
+    {
+        if (!isGameOver)
+        {
+            gameTime++;
+        }
+        else
+        {
+            aTimer.Enabled = false;
+        }
+        InvokeAsync(StateHasChanged);
+    }
+
+    protected async override Task OnInitializedAsync()
+    {
+        answer = "Lets start";
+        //Prepare board for new game
+
+        int counter = 0;
+        for (int i = 0; i< cardCount; i ++)
+        {
+            board.Add(counter);
+            board.Add(counter);
+            var card1 = new Card()
+                {
+                    Id = i+1,
+                    Value = counter,
+                    SecretImage = $"/Assets/{counter+1}.jpg",
+                    BackImage="/Assets/back.png",
+                    Image = "/Assets/back.png",
+                    isPaired = false,
+                    isTurnedOn = false
+                };
+
+            var card2 = new Card()
+                {
+                    Id = (i+1)*2,
+                    Value = counter,
+                    SecretImage = $"/Assets/{counter+1}.jpg",
+                    BackImage = "/Assets/back.png",
+                    Image = "/Assets/back.png",
+                    isPaired = false,
+                    isTurnedOn = false
+                };
+
+            Cards.Add(card1);
+            Cards.Add(card2);
+
+            counter++;
+        }
+
+        //Shuffle cards
+        Random random = new Random();
+        for (int i = 0; i<board.Count; i++)
+        {      int r = random.Next(i, Cards.Count);
+            Card temp = Cards[i];
+            Cards[i] = Cards[r];
+            Cards[r] = temp;
+        }
+    }
+
+
+    private  async Task GetInput(int i,int index)
+    {
+
+        var card1 = new Card();
+        var card2 = new Card();
+        if (isWaiting || isGameOver)
+            return;
+        if (selectedCards.Count==0)
+        {
+            card1 = Cards.Single(x => x.Id == index);
+            if (card1.isPaired)
+                return;
+            selectedCards.Add(card1);
+            selectedIndexes.Add(index);
+            card1.Image = card1.SecretImage;
+            return;
+        }
+        else
+        {
+            card2 = Cards.Single(x => x.Id == index);
+            if (card2.isPaired)
+                return;
+            selectedCards.Add(card2);
+            selectedIndexes.Add(index);
+            card2.Image = card2.SecretImage;
+            if (selectedCards[0].Value == selectedCards[1].Value)
+            {
+                answer = "True";
+                selectedCards[0].isPaired = true;
+                selectedCards[1].isPaired = true;
+                score++;
+            }
+
+            else
+            {
+                answer = "False";
+                isWaiting = true;
+                await Task.Delay(cardTurnTimer);
+                foreach (var card in selectedCards)
+                    card.Image = card.BackImage;
+                isWaiting = false;
+            }
+            selectedCards.Clear();
+            selectedIndexes.Clear();
+        }
+        if (CheckGameOver())
+        {
+            isGameOver = true;
+            answer = "GAME OVER!";
+            buttonText = "New game";
+            await SendGame();
+        }
+
+    }
+
+    private bool CheckGameOver(){
+        foreach(var card in Cards){
+            if(!card.isPaired) 
+                return false;
+        }
+        return true;
+    }
+
+    private async Task SendGame ()
+    {
+        var newGame = new BlazorCardGame.Client.Models.Cardgame()
+            {
+                GameDate = DateTime.Now,
+                GameTime = gameTime,
+                GameType = "Classic",
+                PairsInMinute = (decimal)cardCount*60 / gameTime
+            };
+
+        await GameService.AddGame(newGame);
+
+    }
+}

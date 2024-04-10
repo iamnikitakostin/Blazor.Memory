@@ -1,0 +1,121 @@
+﻿@page "/gamesinfo"
+@rendermode InteractiveWebAssembly
+@using Models
+@using Services
+
+<ConfirmDeleteModal game="@currentGame" OnClose="@OnDeleteModelClose"></ConfirmDeleteModal>
+
+<h3>Game statistics</h3>
+<div class="row">
+    <div class="col-2">
+      
+        <p>Select dates to view</p>       
+        <InputDate class="d-inline" Type="InputDateType.DateTimeLocal"
+                   min="@DateTime.Today.ToString("yyyy-MM-dd")" @bind-Value="@startDateTime" />
+        <InputDate  class ="d-inline"Type="InputDateType.DateTimeLocal"
+                   min="@DateTime.Today.ToString("yyyy-MM-dd")" @bind-Value="@endDateTime" />
+                   <button class="btn btn-outline-warning" type="button" @onclick="@filterByDate">Filter</button>
+    </div>
+      </div>
+
+
+<div class="row">
+    <div class="col-8">
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">Date</th>
+                <th scope="col">Game type</th>
+                <th scope="col">Game time (sec)</th>
+                <th scope="col">Pairs per minute</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach(var game in gameList)
+            {
+                <tr>
+                    <td>
+                        @game.GameDate
+                    </td>
+                    <td>
+                        @game.GameType
+                    </td>
+                    <td>
+                        @game.GameTime
+                    </td>
+                    <td>
+                        @game.PairsInMinute
+                    </td>
+                    <td>
+                            <button type="button"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#deleteModal"
+                                    @onclick="()=> currentGame=game"
+                                    class="btn btn-outline-danger bi bi-trash3"></button>
+                            
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    </div>
+
+    <div class="col-4">
+        <p>Total games: @gameList.Count()</p>
+        <p>Avarage speed: @avaregeSpeed pairs per minute</p>
+        <p>Avarage game time: @avaregeGameTime sec</p>
+        <p>Games per day: @gamesPerDay</p>
+        <p>Games per week: @gamesPerWeek</p>
+
+    </div>
+
+    </div>
+
+
+
+@code {
+    private List<Cardgame> gameList = new();
+    private decimal avaregeSpeed=0;
+    private double avaregeGameTime=0;
+    private Cardgame? currentGame;
+    private DateTime startDateTime;
+    private DateTime endDateTime;
+    private double gamesPerDay = 0;
+    private double gamesPerWeek = 0;
+    protected async override Task OnInitializedAsync ()
+    {
+        gameList = await GameService.GetAll();
+        if (gameList.Count() > 0)
+        {
+            avaregeSpeed = gameList.Sum(x => x.PairsInMinute) / gameList.Count();
+            avaregeGameTime = gameList.Sum(x => x.GameTime) / gameList.Count();
+            double days = (gameList.Max(x => x.GameDate) - gameList.Min(x => x.GameDate)).TotalDays;
+            if (days == 0)
+                days= 1;
+            gamesPerDay = gameList.Count()/days;
+            gamesPerWeek = gamesPerDay / 7;
+        }
+    }
+
+    private async Task DeleteGame(int id)
+    {
+        await GameService.DeleteGame(id);
+        gameList = await GameService.GetAll();
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task filterByDate ()
+    {
+        gameList = await GameService.GetGamesBetweenDates(startDateTime, endDateTime);
+    }
+
+    private async Task OnDeleteModelClose (bool accepted)
+    {
+        if (accepted)
+        {
+            await GameService.DeleteGame(currentGame!.ID);
+            gameList = await GameService.GetAll();
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+}

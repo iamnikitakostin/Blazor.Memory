@@ -1,0 +1,559 @@
+﻿@page "/reports"
+@page "/reports/{GameMode}"
+
+@inject HttpClient client
+
+@if (GameMode == null)
+{
+    <div class="container">
+        <div class="row">
+            <div class="normalgames col-5">
+                <h4>Normal Games</h4>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Pairs</th>
+                            <th>Time</th>
+
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var game in NormalGames!.Take(5))
+                        {
+                            <tr>
+                                <td>@game.Date.ToShortDateString()</td>
+                                <td>@(GameDifficultyExtensions.GetCardsNumber(game.GameDifficulty))</td>
+                                <td>@game.Duration.ToString(@"mm\:ss")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+                <a href="reports/normal" class="">View more</a>
+            </div>
+
+            <span class="col-1"></span>
+
+            <div class="racetimegames col-6">
+                <h4>
+                    Race Time Games
+                </h4>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Score</th>
+                            <th>Time</th>
+                            <th>Time Limit</th>
+
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var game in RaceTimeGames!.Take(5))
+                        {
+                            <tr>
+                                <td>@game.Date.ToShortDateString()</td>
+                                <td>@game.Score</td>
+                                <td>@game.Duration.ToString(@"mm\:ss")</td>
+                                <td>@($"0{game.TimeLimit}:00")</td>
+                            </tr>
+                        }
+
+                    </tbody>
+                </table>
+                <a href="reports/racetime" class="">View more</a>
+
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="movesgames col-5">
+                <h4>
+                    Moves Games
+                </h4>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Score</th>
+                            <th>Moves</th>
+                            <th>Moves Limit</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var game in MovesGames!.Take(5))
+                        {
+                            <tr>
+                                <td>@game.Date.ToShortDateString()</td>
+                                <td>@game.Score</td>
+                                <td>@(game.MovesLimit - game.Moves)</td>
+                                <td>@game.MovesLimit</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+                <a href="reports/moves" class="">View more</a>
+
+            </div>
+
+            <span class="col-1"></span>
+
+
+            <div class="averages col-6">
+                <h4>
+                    Averages weekly, monthly, yearly.
+                </h4>
+
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Game Mode</th>
+                            <th>type</th>
+                            <th>Weekly</th>
+                            <th>Monthly</th>
+                            <th>Yearly</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Normal</td>
+                            <td>Time</td>
+                            <td>@NormalGamesWeeklyAverageTime.ToString(@"mm\:ss")</td>
+                            <td>@NormalGamesMonthlyAverageTime.ToString(@"mm\:ss")</td>
+                            <td>@NormalGamesYearlyAverageTime.ToString(@"mm\:ss")</td>
+                        </tr>
+                        <tr>
+                            <td>Race Time</td>
+                            <td>Time</td>
+                            <td>@RaceTimeGamesWeeklyAverageTime.ToString(@"mm\:ss")</td>
+                            <td>@RaceTimeGamesWeeklyAverageTime.ToString(@"mm\:ss")</td>
+                            <td>@RaceTimeGamesYearlyAverageTime.ToString(@"mm\:ss")</td>
+                        </tr>
+                        <tr>
+                            <td>Race Time</td>
+                            <td>Score</td>
+                            <td>@RaceTimeGamesWeeklyAverageScore</td>
+                            <td>@RaceTimeGamesWeeklyAverageScore</td>
+                            <td>@RaceTimeGamesYearlyAverageScore</td>
+                        </tr>
+                        <tr>
+                            <td>Moves</td>
+                            <td>Score</td>
+                            <td>
+                                @MovesGamesWeeklyAverageScore
+                            </td>
+                            <td>
+                                @MovesGamesMonthlyAverageScore
+                            </td>
+                            <td>
+                                @MovesGamesYearlyAverageScore
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>All</td>
+                            <td>Played</td>
+                            <td>
+                                @GamesPlayedWeekly
+                            </td>
+                            <td>
+                                @GamesPlayedMonthly
+                            </td>
+                            <td>
+                                @GamesPlayedYearly
+                            </td>
+                        </tr>
+
+                    </tbody>
+                </table>
+
+            </div>
+        </div>
+    </div>
+}
+
+@if (GameMode != null)
+{
+    <div class="container">
+        <div class="row">
+
+            <div class="col-6">
+                @if (GameMode == "normal")
+                {
+                    <h4>Normal Games</h4>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Pairs</th>
+                                <th>Time</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var game in NormalGames!)
+                            {
+                                <tr>
+                                    <td>@game.Date.ToShortDateString()</td>
+                                    <td>@(GameDifficultyExtensions.GetCardsNumber(game.GameDifficulty))</td>
+                                    <td>@game.Duration.ToString(@"hh\:mm\:ss")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+                @if (GameMode == "moves")
+                {
+                    <h4>Moves Games</h4>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Score</th>
+                                <th>Moves</th>
+                                <th>Moves Limit</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var game in MovesGames!)
+                            {
+                                <tr>
+                                    <td>@game.Date.ToShortDateString()</td>
+                                    <td>@game.Score</td>
+                                    <td>@(game.MovesLimit - game.Moves)</td>
+                                    <td>@game.MovesLimit</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+
+                @if (GameMode == "racetime")
+                {
+                    <h4>Race Time</h4>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Score</th>
+                                <th>Time</th>
+                                <th>Time Limit</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var game in RaceTimeGames!)
+                            {
+                                <tr>
+                                    <td>@game.Date.ToShortDateString()</td>
+                                    <td>@game.Score</td>
+                                    <td>@game.Duration.ToString(@"hh\:mm\:ss")</td>
+                                    <td>@($"00:0{game.TimeLimit}:00")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+            </div>
+
+            <div class="averages col-6">
+                <h4>
+                    Averages weekly, monthly, yearly.
+                </h4>
+
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Game Mode</th>
+                            <th>type</th>
+                            <th>Weekly</th>
+                            <th>Monthly</th>
+                            <th>Yearly</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (GameMode == "normal")
+                        {
+                            <tr>
+                                <td>Normal</td>
+                                <td>Time</td>
+                                <td>@NormalGamesWeeklyAverageTime.ToString(@"mm\:ss")</td>
+                                <td>@NormalGamesMonthlyAverageTime.ToString(@"mm\:ss")</td>
+                                <td>@NormalGamesYearlyAverageTime.ToString(@"mm\:ss")</td>
+                            </tr>
+                            <tr>
+                                <td>Normal</td>
+                                <td>Played</td>
+                                <td>
+                                    @(CalculateGamesPlayedWeekly(NormalGames!.Cast<IGame>().ToList()))
+                                </td>
+                                <td>
+                                    @(CalculateGamesPlayedMonthly(NormalGames!.Cast<IGame>().ToList()))
+                                </td>
+                                <td>
+                                    @(CalculateGamesPlayedYearly(NormalGames!.Cast<IGame>().ToList()))
+                                </td>
+                            </tr>
+                        }
+                        @if (GameMode == "racetime")
+                        {
+                            <tr>
+                                <td>Race Time</td>
+                                <td>Time</td>
+                                <td>@RaceTimeGamesWeeklyAverageTime.ToString(@"mm\:ss")</td>
+                                <td>@RaceTimeGamesWeeklyAverageTime.ToString(@"mm\:ss")</td>
+                                <td>@RaceTimeGamesYearlyAverageTime.ToString(@"mm\:ss")</td>
+                            </tr>
+                            <tr>
+                                <td>Race Time</td>
+                                <td>Score</td>
+                                <td>@RaceTimeGamesWeeklyAverageScore</td>
+                                <td>@RaceTimeGamesWeeklyAverageScore</td>
+                                <td>@RaceTimeGamesYearlyAverageScore</td>
+                            </tr>
+                            <tr>
+                                <td>Race Time</td>
+                                <td>Played</td>
+                                <td>
+                                    @(CalculateGamesPlayedWeekly(RaceTimeGames!.Cast<IGame>().ToList()))
+                                </td>
+                                <td>
+                                    @(CalculateGamesPlayedMonthly(RaceTimeGames!.Cast<IGame>().ToList()))
+                                </td>
+                                <td>
+                                    @(CalculateGamesPlayedYearly(RaceTimeGames!.Cast<IGame>().ToList()))
+                                </td>
+                            </tr>
+                        }
+                        @if (GameMode == "moves")
+                        {
+                            <tr>
+                                <td>Moves</td>
+                                <td>Score</td>
+                                <td>
+                                    @MovesGamesWeeklyAverageScore
+                                </td>
+                                <td>
+                                    @MovesGamesMonthlyAverageScore
+                                </td>
+                                <td>
+                                    @MovesGamesYearlyAverageScore
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Moves</td>
+                                <td>Played</td>
+                                <td>
+                                    @(CalculateGamesPlayedWeekly(MovesGames!.Cast<IGame>().ToList()))
+                                </td>
+                                <td>
+                                    @(CalculateGamesPlayedMonthly(MovesGames!.Cast<IGame>().ToList()))
+                                </td>
+                                <td>
+                                    @(CalculateGamesPlayedYearly(MovesGames!.Cast<IGame>().ToList()))
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+
+            </div>
+        </div>
+
+
+    </div>
+}
+
+@code {
+    [Parameter]
+    public string? GameMode { get; set; }
+
+    private List<NormalGame>? NormalGames = new List<NormalGame>();
+    private TimeSpan NormalGamesWeeklyAverageTime;
+    private TimeSpan NormalGamesMonthlyAverageTime;
+    private TimeSpan NormalGamesYearlyAverageTime;
+
+    private List<RaceGame>? RaceTimeGames = new List<RaceGame>();
+    private int RaceTimeGamesWeeklyAverageScore;
+    private int RaceTimeGamesMonthlyAverageScore;
+    private int RaceTimeGamesYearlyAverageScore;
+
+    private TimeSpan RaceTimeGamesWeeklyAverageTime;
+    private TimeSpan RaceTimeGamesMonthlyAverageTime;
+    private TimeSpan RaceTimeGamesYearlyAverageTime;
+
+    private List<MovesGame>? MovesGames = new List<MovesGame>();
+    private int MovesGamesWeeklyAverageScore;
+    private int MovesGamesMonthlyAverageScore;
+    private int MovesGamesYearlyAverageScore;
+
+    private int GamesPlayedWeekly;
+    private int GamesPlayedMonthly;
+    private int GamesPlayedYearly;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        NormalGames = await client.GetFromJsonAsync<List<NormalGame>>("https://localhost:7275/api/NormalGame");
+
+        NormalGamesWeeklyAverageTime = CalculateAverageWeeklyTime(NormalGames!.Cast<ITimedGame>().ToList());
+        NormalGamesMonthlyAverageTime = CalculateAverageMonthlyTime(NormalGames!.Cast<ITimedGame>().ToList());
+        NormalGamesYearlyAverageTime = CalculateAverageYearlyTime(NormalGames!.Cast<ITimedGame>().ToList());
+        NormalGames = NormalGames?.OrderByDescending(x => x.Date).ToList();
+
+
+        RaceTimeGames = await client.GetFromJsonAsync<List<RaceGame>>("https://localhost:7275/api/RaceGame");
+
+        RaceTimeGamesWeeklyAverageScore = CalculateAverageWeeklyScore(RaceTimeGames!.Cast<IScoredGame>().ToList());
+        RaceTimeGamesMonthlyAverageScore = CalculateAverageMonthlyScore(RaceTimeGames!.Cast<IScoredGame>().ToList());
+        RaceTimeGamesYearlyAverageScore = CalculateAverageYearlyScore(RaceTimeGames!.Cast<IScoredGame>().ToList());
+
+        RaceTimeGamesWeeklyAverageTime = CalculateAverageWeeklyTime(RaceTimeGames!.Cast<ITimedGame>().ToList());
+        RaceTimeGamesMonthlyAverageTime = CalculateAverageMonthlyTime(RaceTimeGames!.Cast<ITimedGame>().ToList());
+        RaceTimeGamesYearlyAverageTime = CalculateAverageYearlyTime(RaceTimeGames!.Cast<ITimedGame>().ToList());
+
+        RaceTimeGames = RaceTimeGames?.OrderByDescending(x => x.Date).ToList();
+
+        MovesGames = await client.GetFromJsonAsync<List<MovesGame>>("https://localhost:7275/api/MovesGame");
+        MovesGamesWeeklyAverageScore = CalculateAverageWeeklyScore(MovesGames!.Cast<IScoredGame>().ToList());
+        MovesGamesMonthlyAverageScore = CalculateAverageMonthlyScore(MovesGames!.Cast<IScoredGame>().ToList());
+        MovesGamesYearlyAverageScore = CalculateAverageYearlyScore(MovesGames!.Cast<IScoredGame>().ToList());
+        MovesGames = MovesGames?.OrderByDescending(x => x.Date).ToList();
+
+        var allGames = new List<IGame>();
+        allGames.AddRange(NormalGames!);
+        allGames.AddRange(RaceTimeGames!);
+        allGames.AddRange(MovesGames!);
+
+        GamesPlayedWeekly = CalculateGamesPlayedWeekly(allGames);
+        GamesPlayedMonthly = CalculateGamesPlayedMonthly(allGames);
+        GamesPlayedYearly = CalculateGamesPlayedYearly(allGames);
+    }
+
+    private TimeSpan CalculateAverageWeeklyTime(List<ITimedGame> games)
+    {
+        var currentDate = DateTime.Today;
+        var startOfWeek = currentDate.AddDays(-1 * (int)currentDate.DayOfWeek);
+        var endOfWeek = startOfWeek.AddDays(7).AddSeconds(-1);
+
+        var gamesList = games.Where(x => x.Date >= startOfWeek && x.Date <= endOfWeek).ToList();
+
+        if (gamesList.Count <= 0) return TimeSpan.Zero;
+        var totalSeconds = gamesList.Sum(x => x.Duration.TotalSeconds);
+        var averageSeconds = totalSeconds / gamesList.Count;
+        return TimeSpan.FromSeconds(averageSeconds);
+
+    }
+
+    private TimeSpan CalculateAverageMonthlyTime(List<ITimedGame> games)
+    {
+        var currentDate = DateTime.Today;
+        var startOfMonth = new DateTime(currentDate.Year, currentDate.Month, 1);
+        var endOfMonth = startOfMonth.AddMonths(1).AddSeconds(-1);
+
+        var gamesList = games.Where(x => x.Date >= startOfMonth && x.Date <= endOfMonth).ToList();
+        if (gamesList.Count <= 0) return TimeSpan.Zero;
+
+        var totalSeconds = gamesList.Sum(x => x.Duration.TotalSeconds);
+        var averageSeconds = totalSeconds / gamesList.Count;
+        return TimeSpan.FromSeconds(averageSeconds);
+    }
+
+    private TimeSpan CalculateAverageYearlyTime(List<ITimedGame> games)
+    {
+        var currentDate = DateTime.Today;
+        var startOfYear = new DateTime(currentDate.Year, 1, 1);
+        var endOfYear = startOfYear.AddYears(1).AddSeconds(-1);
+
+        var gamesList = games.Where(x => x.Date >= startOfYear && x.Date <= endOfYear).ToList();
+        if (gamesList.Count <= 0) return TimeSpan.Zero;
+
+        var totalSeconds = gamesList.Sum(x => x.Duration.TotalSeconds);
+        var averageSeconds = totalSeconds / gamesList.Count;
+        return TimeSpan.FromSeconds(averageSeconds);
+    }
+
+
+    private int CalculateAverageWeeklyScore(List<IScoredGame> games)
+    {
+
+        var currentDate = DateTime.Today;
+        var startOfWeek = currentDate.AddDays(-1 * (int)currentDate.DayOfWeek);
+        var endOfWeek = startOfWeek.AddDays(7).AddSeconds(-1);
+
+        var gamesList = games.Where(x => x.Date >= startOfWeek && x.Date <= endOfWeek).ToList();
+        if (gamesList.Count > 0)
+        {
+            var totalScore = gamesList.Sum(x => x.Score);
+            var averageScore = totalScore / gamesList.Count;
+            return averageScore;
+        }
+
+        return 0;
+    }
+
+    private int CalculateAverageMonthlyScore(List<IScoredGame> games)
+    {
+        var currentDate = DateTime.Today;
+        var startOfMonth = new DateTime(currentDate.Year, currentDate.Month, 1);
+        var endOfMonth = startOfMonth.AddMonths(1).AddSeconds(-1);
+
+        var gamesList = games.Where(x => x.Date >= startOfMonth && x.Date <= endOfMonth).ToList();
+        if (gamesList.Count > 0)
+        {
+            var totalScore = gamesList.Sum(x => x.Score);
+            var averageScore = totalScore / gamesList.Count;
+            return averageScore;
+        }
+
+        return 0;
+    }
+
+    private int CalculateAverageYearlyScore(List<IScoredGame> games)
+    {
+        var currentDate = DateTime.Today;
+        var startOfYear = new DateTime(currentDate.Year, 1, 1);
+        var endOfYear = startOfYear.AddYears(1).AddSeconds(-1);
+
+        var gamesList = games.Where(x => x.Date >= startOfYear && x.Date <= endOfYear).ToList();
+        if (gamesList.Count > 0)
+        {
+
+            var totalScore = gamesList.Sum(x => x.Score);
+            var averageScore = totalScore / gamesList.Count;
+            return averageScore;
+        }
+
+        return 0;
+    }
+
+    private int CalculateGamesPlayedWeekly(List<IGame> games)
+    {
+        var currentDate = DateTime.Today;
+        var startOfWeek = currentDate.AddDays(-1 * (int)currentDate.DayOfWeek);
+        var endOfWeek = startOfWeek.AddDays(7).AddSeconds(-1);
+
+        var gamesList = games.Where(x => x.Date >= startOfWeek && x.Date <= endOfWeek).ToList();
+        return gamesList.Count;
+    }
+
+    private int CalculateGamesPlayedMonthly(List<IGame> games)
+    {
+        var currentDate = DateTime.Today;
+        var startOfMonth = new DateTime(currentDate.Year, currentDate.Month, 1);
+        var endOfMonth = startOfMonth.AddMonths(1).AddSeconds(-1);
+
+        var gamesList = games.Where(x => x.Date >= startOfMonth && x.Date <= endOfMonth).ToList();
+        return gamesList.Count;
+    }
+
+    private int CalculateGamesPlayedYearly(List<IGame> games)
+    {
+        var currentDate = DateTime.Today;
+        var startOfYear = new DateTime(currentDate.Year, 1, 1);
+        var endOfYear = startOfYear.AddYears(1).AddSeconds(-1);
+
+        var gamesList = games.Where(x => x.Date >= startOfYear && x.Date <= endOfYear).ToList();
+        return gamesList.Count;
+    }
+
+
+}
+

@@ -1,0 +1,65 @@
+﻿@page "/high-scores"
+@using Data.Models
+@inject IScoresService ScoresService
+@inject NavigationManager Navigation
+@rendermode InteractiveServer
+
+<div class="flex flex-col items-center gap-10 justify-center min-h-screen p-4">
+  <h1 class="text-4xl gradient-naruto bg-clip-text text-transparent">High Scores</h1>
+  @if (Games is not null)
+  {
+    @if (Games.Count > 0)
+    {
+      <QuickGrid Items="Games.AsQueryable()" Class="mx-auto">
+        <PropertyColumn Class="column" Property="g => g.Username"/>
+        <PropertyColumn Class="column" Property="g => g.Difficulty"/>
+        <PropertyColumn Class="column" Property="g => g.Moves"/>
+        <PropertyColumn Class="column" Format="mm\:ss" Property="g => g.Time"/>
+        <PropertyColumn Class="column" Property="g => g.Date"/>
+        <TemplateColumn Class="column" Title="Actions" Align="Align.Center">
+          <button @onclick="() => DeleteGame(context)" class="btn warning-btn w-full h-full">Delete</button>
+        </TemplateColumn>
+      </QuickGrid>
+    }
+    else
+    {
+      <h2 class="text-2xl font-bold tracking-widest">
+        What do you waiting for?<br/>
+        Go and play some games!
+      </h2>
+    }
+  }
+  else
+  {
+    <p class="gradient-naruto bg-clip-text text-transparent text-4xl tracking-widest">Loading...</p>
+  }
+  <button @onclick="Back" class="btn primary-btn">Back</button>
+</div>
+
+
+@code {
+  private List<Game>? Games { get; set; }
+
+  protected override async Task OnInitializedAsync()
+  {
+    var games = await ScoresService.GetGameScoresAsync();
+    Games = games;
+  }
+
+  private void Back()
+  {
+    Navigation.NavigateTo("..");
+  }
+
+  private async Task DeleteGame(Game game)
+  {
+    await ScoresService.DeleteGameScoreAsync(game);
+    await RefreshGames();
+  }
+
+  private async Task RefreshGames()
+  {
+    Games = await ScoresService.GetGameScoresAsync();
+  }
+
+}

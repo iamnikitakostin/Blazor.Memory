@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UI", "UI\UI.csproj", "{465160B7-3FB8-4B10-AC60-1CC1B7429635}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Data", "Data\Data.csproj", "{CC529BE9-8BF1-4784-9E16-F4F1154153BB}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{465160B7-3FB8-4B10-AC60-1CC1B7429635}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{465160B7-3FB8-4B10-AC60-1CC1B7429635}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{465160B7-3FB8-4B10-AC60-1CC1B7429635}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{465160B7-3FB8-4B10-AC60-1CC1B7429635}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CC529BE9-8BF1-4784-9E16-F4F1154153BB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CC529BE9-8BF1-4784-9E16-F4F1154153BB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CC529BE9-8BF1-4784-9E16-F4F1154153BB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CC529BE9-8BF1-4784-9E16-F4F1154153BB}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

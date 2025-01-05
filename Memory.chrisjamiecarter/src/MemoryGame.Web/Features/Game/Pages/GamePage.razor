@@ -1,0 +1,191 @@
+﻿@page "/game/{DifficultyString}"
+@rendermode InteractiveServer
+@inject StartGameHandler StartGameHandler
+@inject MatchCardsHandler MatchCardsHandler
+@inject FinishGameHandler FinishGameHandler
+@inject SaveScoreHandler SaveScoreHandler
+@inject NavigationManager NavigationManager
+
+<PageTitle>Memory Game - Play</PageTitle>
+
+<div class="container">
+    @if (Board is null)
+    {
+        <LoadingSpinner />
+    }
+    else
+    {
+        @if (!IsGameOver)
+        {
+            <div class="container">
+                <div class="d-flex flex-column justify-content-between justify-content-lg-around flex-md-row">
+                    <p>Difficulty: @Difficulty</p>
+                    <p>Time Elapsed: @ElapsedSeconds</p>
+                    <p>Moves: @Moves</p>
+                </div>
+            </div>
+            <GameBoard Board="Board" OnCardSelected="CardSelected" />
+        }
+        else
+        {
+            <div class="container">
+                <div class="mb-5">
+                    <h2>Game Over!</h2>
+                </div>
+                <div class="mb-5">
+                    <p>Time Taken: @ElapsedSeconds</p>
+                    <p>Total Moves: @Moves</p>
+                    <p>Final Score: @Score</p>
+                </div>
+                <div class="mb-5">
+                    <p>Enter your username to save your score:</p>
+                    <input @bind="Username" />
+                    <button class="btn btn-outline-light" @onclick="SaveScore">Save Score</button>
+                </div>
+                <div class="mb-5">
+                    <button class="btn btn-outline-light" @onclick="PlayAgain">Play Again</button>
+                </div>
+            </div>
+        }
+    }
+</div>
+
+@code {
+    [Parameter] public string DifficultyString { get; set; } = string.Empty;
+
+    private GameDifficulty Difficulty { get; set; } = GameDifficulty.Normal;
+    private Board? Board;
+    private DateTime StartedTime;
+    private TimeSpan ElapsedTime;
+    private int ElapsedSeconds => Convert.ToInt32(ElapsedTime.TotalSeconds);
+    private int Moves = 0;
+    private bool IsMatching = false;
+    private bool IsGameOver = false;
+    private string Username = string.Empty;
+
+    private System.Timers.Timer? Timer;
+
+    private int Score = 0;
+
+    protected override async Task OnInitializedAsync()
+    {
+        Difficulty = SetGameDifficulty(DifficultyString);
+
+        await StartGame();
+    }
+
+    private async Task StartGame()
+    {
+        var request = new StartGameRequest { Difficulty = Difficulty };
+        var response = await StartGameHandler.Handle(request);
+
+        ElapsedTime = new TimeSpan();
+        IsGameOver = false;
+
+        Board = response.Board;
+        StartedTime = response.StartedTime;
+
+        Timer?.Dispose();
+        Timer = new System.Timers.Timer(500);
+        Timer.Elapsed += (s, e) => InvokeAsync(UpdateTime);
+        Timer.Start();
+    }
+
+    private async Task FinishGame()
+    {
+        Timer?.Stop();
+        await Task.Delay(2000);
+        IsGameOver = true;
+
+        var request = new FinishGameRequest { Difficulty = Difficulty, ElapsedTime = ElapsedTime, Moves = Moves };
+        var response = await FinishGameHandler.Handle(request);
+
+        Score = response.Score;
+    }
+
+    private async Task CardSelected(Card card)
+    {
+        if (IsMatching)
+        {
+            return;
+        }
+
+        card.SelectCard();
+
+        if (Board!.Cards.Count(c => c.IsSelected) == 2)
+        {
+            Moves++;
+            IsMatching = true;
+            await Task.Delay(500);
+
+            var firstCard = Board.Cards.First(c => c.IsSelected);
+            var secondCard = Board.Cards.Last(c => c.IsSelected);
+
+            var request = new MatchCardsRequest
+                {
+                    FirstCardId = firstCard.Id,
+                    SecondCardId = secondCard.Id,
+                };
+
+            var response = await MatchCardsHandler.Handle(request);
+
+            if (response.IsMatch)
+            {
+                firstCard.MatchCard();
+                secondCard.MatchCard();
+            }
+            else
+            {
+                firstCard.SelectCard();
+                secondCard.SelectCard();
+            }
+
+            StateHasChanged();
+
+            if (Board.Cards.All(c => c.IsMatched))
+            {
+                await FinishGame();
+            }
+
+            IsMatching = false;
+        }
+    }
+
+    private async Task PlayAgain()
+    {
+        await StartGame();
+    }
+
+    private async Task SaveScore()
+    {
+        var request = new SaveScoreRequest
+        {
+            DatePlayed = StartedTime.Date,
+            Difficulty = Difficulty,
+            Moves = Moves,
+            TimeTakenInSeconds = ElapsedSeconds,
+            TotalScore = Score,
+            Username = Username,
+        };
+
+        var response = await SaveScoreHandler.Handle(request);
+        
+        NavigationManager.NavigateTo("/high-scores");
+    }
+
+    private GameDifficulty SetGameDifficulty(string value)
+    {
+        return value.ToLower() switch
+        {
+            "easy" => GameDifficulty.Easy,
+            "hard" => GameDifficulty.Hard,
+            _ => GameDifficulty.Normal
+        };
+    }
+
+    private void UpdateTime()
+    {
+        ElapsedTime = DateTime.UtcNow - StartedTime;
+        StateHasChanged();
+    }
+}

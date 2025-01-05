@@ -1,0 +1,30 @@
+﻿@if(Board is null)
+{
+    <LoadingSpinner />
+}
+else
+{
+    <div class="container">
+        <div class="row g-3 row-cols-2 row-cols-md-4">
+            @foreach (var card in Board.Cards)
+            {
+                <div class="col d-flex justify-content-center">
+                    <GameCard Card="card" OnCardSelected="CardSelected" />
+                </div>
+            }
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public Board? Board { get; set; }
+    [Parameter] public EventCallback<Card> OnCardSelected { get; set; }
+
+    private async Task CardSelected(Card card)
+    {
+        if (OnCardSelected.HasDelegate)
+        {
+            await OnCardSelected.InvokeAsync(card);
+        }
+    }
+}

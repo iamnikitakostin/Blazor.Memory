@@ -1,0 +1,106 @@
+:root {
+  --gunmetal: #272d2d;
+  --alice-blue: #edf5fc;
+  --emerald: #23ce6b;
+}
+
+body {
+  font-family: "Press Start 2P", serif !important;
+  font-size: 0.75rem;
+}
+
+.game-card {
+  height: 5rem;
+  padding: 0.25rem;
+  text-align: center;
+  display: block;
+  position: relative;
+  cursor: pointer;
+  max-width: 10rem;
+  width: 100%;
+  z-index: 50;
+}
+
+.game-card-body {
+  height: 100%;
+  width: 100%;
+  display: block;
+  transform-style: preserve-3d;
+  transition: .4s ease-in-out;
+  background: var(--gunmetal);
+  color: var(--alice-blue);
+}
+
+.card-image > svg {
+  width: 2rem;
+}
+
+.selected, .matched {
+  transform: rotateY(180deg);
+}
+
+.matched {
+  animation: 1s matchAnimation ease-in-out;
+  background: var(--alice-blue);
+  color: var(--gunmetal);
+}
+
+.game-card-body {
+  border: 0.25rem solid var(--alice-blue);
+}
+
+.front, .back {
+  backface-visibility: hidden;
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.front {
+  transform: rotateY(-180deg);
+}
+
+.back {
+  transform: rotateX(0);
+}
+
+.memory-game-logo {
+  max-width: 10rem;
+}
+
+.first-place > td {
+  color: gold;
+}
+
+.second-place > td {
+  color: silver;
+}
+
+.third-place > td {
+  color: #cd7f32;
+}
+
+.sortable {
+  cursor: pointer;
+}
+
+@keyframes matchAnimation {
+  0% {
+    background: var(--gunmetal);
+    color: var(--alice-blue);
+  }
+
+  50% {
+    background: var(--emerald);
+  }
+
+  100% {
+    background: var(--alice-blue);
+    color: var(--gunmetal);
+  }
+}

@@ -1,0 +1,61 @@
+﻿@page "/high-scores"
+@inject GetHighScoresHandler GetHighScoresHandler
+
+<div class="container">
+    <h1 class="mb-5">High Scores</h1>
+
+    @if (HighScoreData is null)
+    {
+        <LoadingSpinner />
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-borderless table-hover table-striped">
+                <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th>Username</th>
+                        <th>Score</th>
+                        <th>Difficulty</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var score in HighScoreData)
+                    {
+                        <tr class="@(GetRankClass(score.Rank))">
+                            <td>@score.Rank</td>
+                            <td>@score.Username</td>
+                            <td>@score.Score</td>
+                            <td>@score.Difficulty</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+
+</div>
+
+@code {
+    private IReadOnlyList<HighScore>? HighScoreData;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var request = new GetHighScoresRequest();
+        var response = await GetHighScoresHandler.Handle(request);
+
+        HighScoreData = response.HighScores;
+    }
+
+    private string GetRankClass(int rank)
+    {
+        return rank switch
+        {
+            1 => "first-place",
+            2 => "second-place",
+            3 => "third-place",
+            _ => "",
+        };
+    }
+}

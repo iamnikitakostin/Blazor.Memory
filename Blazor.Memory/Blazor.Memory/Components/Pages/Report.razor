@@ -1,0 +1,22 @@
+﻿@page "/report"
+
+<h3>Report</h3>
+
+<div class="d-flex">
+    <div class="d-flex flex-column">
+        @foreach(string line in report)
+            {
+                <p>@line</p>
+            }
+    </div>
+</div>
+
+@code {
+    [Inject] private Blazor.Memory.Services.GamesService _service { get; set; }
+    private List<string> report { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        report = await _service.GetReportAsync();
+    }
+}

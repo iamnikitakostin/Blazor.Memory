@@ -1,0 +1,55 @@
+﻿@page "/play"
+@rendermode InteractiveServer
+
+<h3>Playscreen</h3>
+
+<Map OnGameCompleted="@HandleGameCompleted" Stopwatch="@Stopwatch" />
+
+@if (!IsRunning)
+{
+    <div class="position-absolute top-50 bottom-50">
+        <p>Would you like to play another game?</p>
+        <div>
+            <button class="btn-secondary" @onclick="AnotherGameProceed">Yes</button>
+            <button class="btn-danger" @onclick="AnotherGameCancellation">No</button>
+        </div>
+    </div>
+}
+
+
+@code {
+    private System.Diagnostics.Stopwatch Stopwatch = new System.Diagnostics.Stopwatch();
+    private DateTime StartDate { get; set; }
+    private bool IsRunning { get; set; } = true;
+
+    [Inject] private Blazor.Memory.Services.GamesService _service { get; set; }
+    [Inject] private NavigationManager NavigationManager { get; set; }
+    [Parameter] public EventCallback OnGameCompleted { get; set; }
+
+    private void AnotherGameCancellation()
+    {
+        NavigationManager.NavigateTo("/menu");
+    }
+
+    private void AnotherGameProceed()
+    {
+        NavigationManager.Refresh(true);
+    }
+
+    private async void HandleGameCompleted()
+    {
+        IsRunning = false;
+        Stopwatch.Stop();
+
+        StartDate = DateTime.Now;
+
+        await _service.AddGameAsync(new Models.Game
+        {
+            Duration = Stopwatch.Elapsed,
+            StartTime = StartDate
+        });
+        StateHasChanged();
+    }
+
+
+}

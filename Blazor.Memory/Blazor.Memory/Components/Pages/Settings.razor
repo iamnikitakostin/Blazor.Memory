@@ -1,0 +1,54 @@
+﻿@page "/settings"
+@rendermode InteractiveServer
+
+<h3>Settings</h3>
+
+<div>
+    <EditForm Model="@currentSettings" OnValidSubmit="OnSubmit">
+        <DataAnnotationsValidator />
+
+        <div>
+            <label>Number of cards (min. 4 cards, max. 32 cards, the number will be round up to the nearest even number):</label>
+            <InputNumber @bind-Value="currentSettings.CardsNumber" class="form-control" />
+            <ValidationMessage For="@(() => currentSettings.CardsNumber)" />
+        </div>
+
+        <button class="btn-success">Save</button>
+    </EditForm>
+</div>
+
+@code {
+    [Inject] private Blazor.Memory.Services.SettingsService _service { get; set; }
+    [Inject] private NavigationManager NavigationManager { get; set; }
+    private Blazor.Memory.Models.Settings currentSettings = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        currentSettings = await _service.GetSettingsAsync();
+    }
+
+    public async Task OnSubmit()
+    {
+        Console.WriteLine("OnSubmit called");
+        try {
+            if (!(currentSettings.CardsNumber % 2 == 0))
+            {
+                currentSettings.CardsNumber += 1;
+            }
+
+            var settings = new Models.Settings
+            {
+                CardsNumber = currentSettings.CardsNumber
+            };
+
+            await _service.UpdateAsync(settings);
+
+            NavigationManager.NavigateTo("/menu", true);
+        } catch (Exception ex)
+        {
+            //show error
+            Console.WriteLine($"Error updating settings: {ex.Message}"); // Debug log
+        }
+
+    }
+}

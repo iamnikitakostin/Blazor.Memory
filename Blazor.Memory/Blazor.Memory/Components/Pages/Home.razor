@@ -1,0 +1,17 @@
+﻿@page "/"
+@rendermode InteractiveServer
+
+@code {
+    [Inject] private NavigationManager NavigationManager { get; set; }
+    private bool hasRedirected;
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if(firstRender && !hasRedirected)
+        {
+            hasRedirected = true;
+            NavigationManager.NavigateTo("/menu");
+
+        }
+    }
+}

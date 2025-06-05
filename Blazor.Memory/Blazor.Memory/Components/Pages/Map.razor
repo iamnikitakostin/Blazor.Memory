@@ -1,0 +1,121 @@
+﻿@inject IJSRuntime Js
+@rendermode InteractiveServer
+
+@{
+    int cardCount = 0;
+    List<string> cardsVisual = new(){
+        "👓", "👜", "💪🏻", "🧢", "👟", "👕", "👖", "👗", "👠", "👒", "👙", "🧥", "🧣", "🧤", "🧦", "👔"
+    };
+}
+
+<h3>Map</h3>
+<p>@Stopwatch</p>
+
+@if (map.Count == CurrentCardsSettings)
+{
+    <div class="d-grid gap-1">
+        @for (int i = 1; i <= Math.Ceiling((double)CurrentCardsSettings / 4); i++)
+        {
+            <div class="row gap-1">
+                @for (int n = 1; n <= 4; n++)
+                {
+                    var id = cardCount.ToString();
+                    <div class="col bg-success border-1">
+                        <button class="opacity-0 fw-bold w-100" id="@id" @onclick="() => Flip(id)">
+                            @cardsVisual[map.GetValueOrDefault(cardCount)]
+                        </button>
+                    </div>
+                    if (cardCount >= map.Count - 1)
+                        break;
+                    cardCount++;
+                }
+            </div>
+        }
+    </div>
+}
+else
+{
+    <div class="container">
+        The map is loading...
+    </div>
+}
+
+@code {
+    private Dictionary<int, int> map = new Dictionary<int, int>();
+
+    [Parameter]
+    public EventCallback OnGameCompleted { get; set; }
+    [Parameter]
+    public System.Diagnostics.Stopwatch Stopwatch { get; set; }
+    [Parameter]
+    public DateTime StartDate { get; set; }
+
+    private int CardDone { get; set; }
+    private int CurrentCardsSettings { get; set; }
+
+    private List<string> currentlyFlippedCards = new();
+
+    [Inject] private Blazor.Memory.Services.GamesService _service { get; set; }
+    [Inject] private Blazor.Memory.Services.SettingsService _settingsService { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var settingsFetch = await _settingsService.GetSettingsAsync();
+        CurrentCardsSettings = settingsFetch.CardsNumber;
+
+        map = await _service.GenerateGameMap();
+        StartDate = DateTime.Now;
+        Stopwatch.Start();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await StopWatch();
+        }
+    }
+
+    private async Task Flip(string id)
+    {
+        if (currentlyFlippedCards.Contains(id))
+            return;
+
+        currentlyFlippedCards.Add(id);
+        await Js.InvokeVoidAsync("flipCard", args: id);
+
+        if (currentlyFlippedCards.Count == 2)
+        {
+            if (map[Int32.Parse(currentlyFlippedCards[0])] == map[Int32.Parse(currentlyFlippedCards[1])])
+            {
+                await Js.InvokeVoidAsync("matchFound", currentlyFlippedCards[0], currentlyFlippedCards[1]);
+                currentlyFlippedCards = new();
+
+                CardDone += 2;
+                if (CardDone == map.Count)
+                {
+                    await OnGameCompleted.InvokeAsync();
+                }
+                return;
+            }
+            else
+            {
+                await Js.InvokeVoidAsync("matchNotFound", currentlyFlippedCards[0], currentlyFlippedCards[1]);
+                currentlyFlippedCards = new();
+                return;
+            }
+        }
+    }
+
+    private async Task StopWatch()
+    {
+        while (Stopwatch.IsRunning)
+        {
+            await Task.Delay(1000);
+            if (Stopwatch.IsRunning)
+            {
+                await InvokeAsync(StateHasChanged);
+            }
+        }
+    }
+}

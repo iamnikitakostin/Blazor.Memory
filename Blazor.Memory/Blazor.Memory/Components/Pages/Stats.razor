@@ -1,0 +1,39 @@
+﻿@page "/stats"
+
+<h3>Stats</h3>
+
+<table class="table-bordered w-100">
+    <thead>
+        <tr>
+            <th>Duration</th>
+            <th>Start Time</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach(var game in Games)
+        {
+            <tr>
+                <td>
+                    @game.Duration
+                </td>
+                <td>
+                    @game.StartTime
+                </td>
+            </tr>
+            
+        }
+    </tbody>
+     
+</table>
+
+@code {
+    [Inject] private Blazor.Memory.Services.GamesService _service { get; set; }
+
+    private List<Blazor.Memory.Models.Game> Games { get; set; } = new List<Models.Game>();
+
+
+    protected async override Task OnInitializedAsync()
+    {
+        Games = (await _service.GetGamesAsync()).OrderBy(r => r.Duration).ToList();
+    }
+}

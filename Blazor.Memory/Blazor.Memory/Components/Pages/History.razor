@@ -1,0 +1,33 @@
+﻿@page "/history"
+@rendermode InteractiveServer
+
+<h3>History</h3>
+
+<div>
+    <label>Search:</label>
+    <input @onchange="OnSearchChange" />
+</div>
+
+<div class="d-flex flex-column gap-1">
+    @foreach(var item in games)
+            {
+                <p href="">@item.Id - @item.StartTime - @item.Duration</p>
+            }
+</div>
+
+@code {
+    private List<Blazor.Memory.Models.Game> games = new List<Blazor.Memory.Models.Game>();
+    [Inject] private Blazor.Memory.Services.GamesService _service { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        games = await _service.GetGamesAsync();
+    }
+
+    private async Task OnSearchChange(ChangeEventArgs e)
+    {
+        var searchTerm = e.Value?.ToString() ?? string.Empty;
+        games = await _service.SearchGameByQueryAsync(searchTerm);
+        StateHasChanged();
+    }
+}
